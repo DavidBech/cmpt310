@@ -35,7 +35,13 @@ def buyLotsOfFruit(orderList):
     Returns cost of order
     """
     totalCost = 0.0
-    "*** YOUR CODE HERE ***"
+    for fruit, quantity in orderList:
+        try:
+            totalCost += quantity * fruitPrices[fruit]
+        except KeyError:
+            print(f"KeyError: '{fruit}' is not in fruitPrices map")
+            return None
+
     return totalCost
 
 
