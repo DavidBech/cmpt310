@@ -91,15 +91,11 @@ def depthFirstSearch(problem):
     expandedStates = set()
     path = {}
     moveList = []
-    cntr = 0
-    cntr1 = 0
     path[currentState[0]] = None
     while not problem.isGoalState(currentState[0]):
-        cntr1 +=1
         for state in problem.getSuccessors(currentState[0]):
             if state[0] in expandedStates:
                 continue
-            cntr +=1
             path[state[0]] = currentState
             frontier.push(state)
         
