@@ -72,41 +72,6 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
-class graphSearch:
-    def __init__(self, frontier):
-        self.frontier = frontier()
-
-    def search(self, problem):
-        currentState = (problem.getStartState(), None, None)
-        expandedStates = set()
-        path = {}
-        moveList = []
-        path[currentState[0]] = None
-        while not problem.isGoalState(currentState[0]):
-            for state in problem.getSuccessors(currentState[0]):
-                if state[0] in expandedStates:
-                    continue
-                path[state[0]] = currentState
-                self.frontier.push(state)
-
-            expandedStates.add(currentState[0])
-
-            while currentState[0] in expandedStates:
-                try:
-                    currentState = self.frontier.pop()
-                except IndexError:
-                    print("No Path Found")
-                    return None
-
-        prevState = path[currentState[0]]
-        while prevState != None:
-            moveList.append(prevState[1])
-            prevState = path[prevState[0]]
-    
-        moveList = list(reversed(moveList[:-1]))
-        moveList.append(currentState[1])
-        return moveList
-
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -121,14 +86,70 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    searchAlgo = graphSearch(util.Stack)
-    return searchAlgo.search(problem)
+    frontier = util.Stack()
+    currentState = (problem.getStartState(), None, None)
+    expandedStates = set()
+    path = {}
+    moveList = []
+    path[currentState[0]] = None
+    while not problem.isGoalState(currentState[0]):
+        for state in problem.getSuccessors(currentState[0]):
+            if state[0] in expandedStates:
+                continue
+            path[state[0]] = currentState
+            frontier.push(state)
+
+        expandedStates.add(currentState[0])
+
+        while currentState[0] in expandedStates:
+            try:
+                currentState = frontier.pop()
+            except IndexError:
+                print("No Path Found")
+                return None
+
+    prevState = path[currentState[0]]
+    while prevState != None:
+        moveList.append(prevState[1])
+        prevState = path[prevState[0]]
+    
+    moveList = list(reversed(moveList[:-1]))
+    moveList.append(currentState[1])
+    return moveList
     
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    # TODO
-    util.raiseNotDefined()
+    frontier = util.Queue()
+    currentState = (problem.getStartState(), None, None)
+    expandedStates = set()
+    path = {}
+    moveList = []
+    path[currentState[0]] = None
+    while not problem.isGoalState(currentState[0]):
+        for state in problem.getSuccessors(currentState[0]):
+            if state[0] in path:
+                continue
+            path[state[0]] = currentState
+            frontier.push(state)
+
+        expandedStates.add(currentState[0])
+
+        while currentState[0] in expandedStates:
+            try:
+                currentState = frontier.pop()
+            except IndexError:
+                print("No Path Found")
+                return None
+
+    prevState = path[currentState[0]]
+    while prevState != None:
+        moveList.append(prevState[1])
+        prevState = path[prevState[0]]
+    
+    moveList = list(reversed(moveList[:-1]))
+    moveList.append(currentState[1])
+    return moveList
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
