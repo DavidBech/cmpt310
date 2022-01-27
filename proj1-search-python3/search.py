@@ -86,10 +86,10 @@ class searchTree:
             return self.__str__()
 
         def __str__(self):
-            return f"({self.state})"
+            return f"({self.name} {self.delta} {self.cost})"
 
     def __init__(self, frontier, problem):
-        self.frontier = frontier()
+        self.frontier = frontier
         self.problem = problem
         initState = (self.problem.getStartState(), None, None)
         self.root = self.State(initState)
@@ -145,16 +145,20 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    return searchTree(util.Stack, problem).search()
+    return searchTree(util.Stack(), problem).search()
     
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    return searchTree(util.Queue, problem).search()
+    return searchTree(util.Queue(), problem).search()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
-    # TODO
-    util.raiseNotDefined()
+    def totalCost(item):
+        if item.parent.cost:
+            return item.parent.cost + item.cost
+        else: 
+            return item.cost
+    return searchTree(util.PriorityQueueWithFunction(totalCost), problem).search()
 
 def nullHeuristic(state, problem=None):
     """
