@@ -72,6 +72,46 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+class searchTree:
+    class State:
+        def __init__(self, _state, _parent = None):
+            self.state = _state
+            self.children = []
+            self.parent = _parent
+
+        def __repr__(self) -> str:
+            return self.__str__()
+
+        def __str__(self):
+            return f"({self.state})"
+
+    def __init__(self, initState):
+        self.stateMap = {}
+        self.root = self.State(initState)
+        self.stateMap[initState[0]] = self.root
+        
+    def addState(self, parentState, newState):
+        try:
+            parState = self.stateMap[parentState[0]]
+        except KeyError:
+            print(parentState)
+            print(newState)
+            print("Invalid Parent State not in search tree")
+            print(self.stateMap)
+            raise
+        cState = self.State(newState, parState)
+        parState.children.append(cState)
+        self.stateMap[newState[0]] = cState
+
+    def getPath(self, endState):
+        path = []
+        curState = self.stateMap[endState[0]]
+        while curState != None:
+            path.append(curState)
+            curState = curState.parent
+        path = reversed(path)
+        return path
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -87,16 +127,12 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     frontier = util.Stack()
-    currentState = (problem.getStartState(), None, None)
     expandedStates = set()
-    path = {}
-    moveList = []
-    path[currentState[0]] = None
+    currentState = (problem.getStartState(), None, None)
+    tree = searchTree(currentState)
     while not problem.isGoalState(currentState[0]):
         for state in problem.getSuccessors(currentState[0]):
-            if state[0] in expandedStates:
-                continue
-            path[state[0]] = currentState
+            tree.addState(currentState, state)
             frontier.push(state)
 
         expandedStates.add(currentState[0])
@@ -108,14 +144,15 @@ def depthFirstSearch(problem):
                 print("No Path Found")
                 return None
 
-    prevState = path[currentState[0]]
-    while prevState != None:
-        moveList.append(prevState[1])
-        prevState = path[prevState[0]]
+    stateList = tree.getPath(currentState)
+    moveList = []
+    for state in stateList:
+        try:
+            moveList.append(state.state[1])
+        except AttributeError:
+            pass
     
-    moveList = list(reversed(moveList[:-1]))
-    moveList.append(currentState[1])
-    return moveList
+    return moveList[1:]
     
 
 def breadthFirstSearch(problem):
