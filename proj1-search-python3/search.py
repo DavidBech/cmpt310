@@ -17,6 +17,7 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
+from hashlib import new
 import util
 
 class SearchProblem:
@@ -74,10 +75,12 @@ def tinyMazeSearch(problem):
 
 class searchTree:
     class State:
-        def __init__(self, _state, _parent = None):
-            self.state = _state
-            self.children = []
+        def __init__(self, stateTuple, _parent = None):
+            self.name = stateTuple[0]
+            self.delta = stateTuple[1]
+            self.cost = stateTuple[2]
             self.parent = _parent
+            self.children = []
 
         def __repr__(self) -> str:
             return self.__str__()
@@ -85,32 +88,48 @@ class searchTree:
         def __str__(self):
             return f"({self.state})"
 
-    def __init__(self, initState):
-        self.stateMap = {}
+    def __init__(self, frontier, problem):
+        self.frontier = frontier()
+        self.problem = problem
+        initState = (self.problem.getStartState(), None, None)
         self.root = self.State(initState)
-        self.stateMap[initState[0]] = self.root
         
-    def addState(self, parentState, newState):
-        try:
-            parState = self.stateMap[parentState[0]]
-        except KeyError:
-            print(parentState)
-            print(newState)
-            print("Invalid Parent State not in search tree")
-            print(self.stateMap)
-            raise
-        cState = self.State(newState, parState)
-        parState.children.append(cState)
-        self.stateMap[newState[0]] = cState
-
+    def addState(self, _parentState, _newState):
+        newState = self.State(_newState, _parentState)
+        _parentState.children.append(newState)
+        self.frontier.push(newState)
+        
     def getPath(self, endState):
         path = []
-        curState = self.stateMap[endState[0]]
+        curState = endState
         while curState != None:
             path.append(curState)
             curState = curState.parent
         path = reversed(path)
         return path
+
+    def search(self):
+        expandedStates = set()
+        currentState = self.root
+        while not self.problem.isGoalState(currentState.name):
+            for state in self.problem.getSuccessors(currentState.name):
+                self.addState(currentState, state)
+
+            expandedStates.add(currentState.name)
+
+            while currentState.name in expandedStates:
+                try:
+                    currentState = self.frontier.pop()
+                except IndexError:
+                    print("No Path Found")
+                    return None
+        
+        moveList = []
+        for state in self.getPath(currentState):
+            moveList.append(state.delta)
+
+        # remove null from root delta
+        return moveList[1:]
 
 def depthFirstSearch(problem):
     """
@@ -126,67 +145,11 @@ def depthFirstSearch(problem):
     print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
-    frontier = util.Stack()
-    expandedStates = set()
-    currentState = (problem.getStartState(), None, None)
-    tree = searchTree(currentState)
-    while not problem.isGoalState(currentState[0]):
-        for state in problem.getSuccessors(currentState[0]):
-            tree.addState(currentState, state)
-            frontier.push(state)
-
-        expandedStates.add(currentState[0])
-
-        while currentState[0] in expandedStates:
-            try:
-                currentState = frontier.pop()
-            except IndexError:
-                print("No Path Found")
-                return None
-
-    stateList = tree.getPath(currentState)
-    moveList = []
-    for state in stateList:
-        try:
-            moveList.append(state.state[1])
-        except AttributeError:
-            pass
+    return searchTree(util.Stack, problem).search()
     
-    return moveList[1:]
-    
-
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
-    frontier = util.Queue()
-    currentState = (problem.getStartState(), None, None)
-    expandedStates = set()
-    path = {}
-    moveList = []
-    path[currentState[0]] = None
-    while not problem.isGoalState(currentState[0]):
-        for state in problem.getSuccessors(currentState[0]):
-            if state[0] in path:
-                continue
-            path[state[0]] = currentState
-            frontier.push(state)
-
-        expandedStates.add(currentState[0])
-
-        while currentState[0] in expandedStates:
-            try:
-                currentState = frontier.pop()
-            except IndexError:
-                print("No Path Found")
-                return None
-
-    prevState = path[currentState[0]]
-    while prevState != None:
-        moveList.append(prevState[1])
-        prevState = path[prevState[0]]
-    
-    moveList = list(reversed(moveList[:-1]))
-    moveList.append(currentState[1])
-    return moveList
+    return searchTree(util.Queue, problem).search()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
