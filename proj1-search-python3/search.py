@@ -170,9 +170,11 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    # TODO
-    util.raiseNotDefined()
-
+    def totalCost(item):
+        if item.parent.cost:
+            item.cost += item.parent.cost
+        return item.cost + heuristic(item.name, problem)
+    return searchTree(util.PriorityQueueWithFunction(totalCost), problem).search()
 
 # Abbreviations
 bfs = breadthFirstSearch
