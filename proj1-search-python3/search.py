@@ -155,7 +155,8 @@ def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     def totalCost(item):
         if item.parent.cost:
-            return item.parent.cost + item.cost
+            item.cost += item.parent.cost
+            return item.cost
         else: 
             return item.cost
     return searchTree(util.PriorityQueueWithFunction(totalCost), problem).search()
