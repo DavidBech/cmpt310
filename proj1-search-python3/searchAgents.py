@@ -486,8 +486,9 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodGrid = foodGrid.asList()
+    foodQuant = len(foodGrid)
+    return foodQuant
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
