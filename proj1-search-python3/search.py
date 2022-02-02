@@ -76,7 +76,7 @@ def tinyMazeSearch(problem):
 class searchTree:
     class State:
         def __init__(self, stateTuple, _parent = None):
-            self.name = stateTuple[0]
+            self.pState = stateTuple[0]
             self.delta = stateTuple[1]
             self.cost = stateTuple[2]
             self.parent = _parent
@@ -86,7 +86,7 @@ class searchTree:
             return self.__str__()
 
         def __str__(self):
-            return f"({self.name} {self.delta} {self.cost})"
+            return f"({self.pState} {self.delta} {self.cost})"
 
     def __init__(self, frontier, problem):
         self.frontier = frontier
@@ -111,13 +111,13 @@ class searchTree:
     def search(self):
         expandedStates = set()
         currentState = self.root
-        while not self.problem.isGoalState(currentState.name):
-            for state in self.problem.getSuccessors(currentState.name):
+        while not self.problem.isGoalState(currentState.pState):
+            for state in self.problem.getSuccessors(currentState.pState):
                 self.addState(currentState, state)
 
-            expandedStates.add(currentState.name)
+            expandedStates.add(currentState.pState)
 
-            while currentState.name in expandedStates:
+            while currentState.pState in expandedStates:
                 try:
                     currentState = self.frontier.pop()
                 except IndexError:
