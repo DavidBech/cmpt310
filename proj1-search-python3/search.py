@@ -173,7 +173,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     def totalCost(item):
         if item.parent.cost:
             item.cost += item.parent.cost
-        return item.cost + heuristic(item.name, problem)
+        return item.cost + heuristic(item.pState, problem)
     return searchTree(util.PriorityQueueWithFunction(totalCost), problem).search()
 
 # Abbreviations
