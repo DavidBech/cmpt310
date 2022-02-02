@@ -377,21 +377,32 @@ def cornersHeuristic(state, problem):
     """
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
+    top, right = problem.walls.height-2, problem.walls.width-2
 
-    # basic heuristic return number of corners to reach
-    #return len(state[1])
-    height = walls.height - 2
-    weight = walls.width - 2
-    cornerManhatanCost = height * 2 + weight * 2
-    cornersToHit = len(state[1])
-    if cornersToHit == 4:
-        return cornerManhatanCost
-    elif cornersToHit == 3:
-        return cornerManhatanCost - max( height, weight )
-    elif cornersToHit == 2:
-        return cornerManhatanCost - max( height, weight ) * 2
-    elif cornersToHit == 1:
-        return cornerManhatanCost - max( height, weight ) * 2 - min(height, weight)
+    # since x,y start at "1" (wall is at 0)
+    heightSteps = top -1
+    widthSteps = right -1
+
+    unseenCorners = state[1]
+    xpos, ypos = state[0]
+    if len(unseenCorners) > 0:
+        closetCornernDist = walls.height + walls.width
+        closestCorner = unseenCorners[0]
+        for corner in unseenCorners:
+            cornerDist = abs(xpos - corner[0]) + abs(ypos -corner[1])
+            if cornerDist < closetCornernDist:
+                closestCorner = corner
+                closetCornernDist = cornerDist
+
+        extraDist = 0
+        if len(unseenCorners) == 4:
+            pass
+            #extraDist = min(top*2+right, right*2+top)
+        if len(unseenCorners) == 3:
+            pass
+        if len(unseenCorners) == 2:
+            pass
+        return closetCornernDist + extraDist
     else:
         return 0
 
