@@ -486,9 +486,60 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    foodGrid = foodGrid.asList()
-    foodQuant = len(foodGrid)
-    return foodQuant
+    foodList = foodGrid.asList()
+    if len(foodList) == 0:
+        return 0
+    try:
+        pointDict = problem.heuristicInfo["pointDict"]
+    except KeyError:
+        pointDict = {}
+        for food0 in foodList:
+            for food1 in foodList:
+                dist = mazeDistance(food0, food1, problem.startingGameState)
+                pointDict[food0, food1] = dist
+                pointDict[food1, food0] = dist
+        problem.heuristicInfo["pointDict"] = pointDict
+
+    minDist = problem.walls.width * problem.walls.height
+    currentFood = None
+    for food in foodList:
+        try:
+            dist = pointDict[position, food]
+        except KeyError:
+            dist = mazeDistance(position, food, problem.startingGameState)
+            pointDict[position, food] = dist
+            pointDict[food, position] = dist
+        if dist < minDist:
+            minDist= dist
+            currentFood = food
+    if len(foodList) == 1:
+        return minDist
+    #print(f"pos{position}")
+    #print(totalDist)
+    #print(currentFood)
+    #while len(foodList) != len(foodTraversed):
+    #    minDist = problem.walls.width * problem.walls.height
+    #    for food in foodList:
+    #        if food in foodTraversed:
+    #            continue
+    #        dist = pointDict[food, currentFood]
+    #        if dist < minDist:
+    #            minDist = dist
+    #            currentFood = food
+    #    foodTraversed.add(currentFood)
+    #    totalDist += minDist
+        #print(minDist)
+        #print(currentFood)
+
+    #print(totalDist - len(foodList))
+    #util.pause()
+    maxDist = 0
+    for food in foodList:
+        dist = pointDict[currentFood, food]
+        if dist > maxDist:
+            maxDist = dist
+
+    return minDist + maxDist
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
