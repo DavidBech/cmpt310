@@ -487,8 +487,12 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     foodList = foodGrid.asList()
+    # if no food remain problem is sovled return 0
     if len(foodList) == 0:
         return 0
+
+    # if this is the first run calculate the distance 
+    #   between all the dots
     try:
         pointDict = problem.heuristicInfo["pointDict"]
     except KeyError:
@@ -500,6 +504,7 @@ def foodHeuristic(state, problem):
                 pointDict[food1, food0] = dist
         problem.heuristicInfo["pointDict"] = pointDict
 
+    # calculate maze distance to closest dot
     minDist = problem.walls.width * problem.walls.height
     currentFood = None
     for food in foodList:
@@ -514,27 +519,12 @@ def foodHeuristic(state, problem):
             currentFood = food
     if len(foodList) == 1:
         return minDist
-    #print(f"pos{position}")
-    #print(totalDist)
-    #print(currentFood)
-    #while len(foodList) != len(foodTraversed):
-    #    minDist = problem.walls.width * problem.walls.height
-    #    for food in foodList:
-    #        if food in foodTraversed:
-    #            continue
-    #        dist = pointDict[food, currentFood]
-    #        if dist < minDist:
-    #            minDist = dist
-    #            currentFood = food
-    #    foodTraversed.add(currentFood)
-    #    totalDist += minDist
-        #print(minDist)
-        #print(currentFood)
 
-    #print(totalDist - len(foodList))
-    #util.pause()
+    # calculate distance from closest food to furthest food
     maxDist = 0
     for food in foodList:
+        if food == currentFood:
+            continue
         dist = pointDict[currentFood, food]
         if dist > maxDist:
             maxDist = dist
