@@ -49,6 +49,7 @@ class ReflexAgent(Agent):
 
         "Add more of your code here if you want to"
 
+        #util.pause()
         return legalMoves[chosenIndex]
 
     def evaluationFunction(self, currentGameState, action):
@@ -68,13 +69,47 @@ class ReflexAgent(Agent):
         """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
-        newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        if successorGameState.isWin():
+            return 1 << 31
+        elif successorGameState.isLose():
+            return -1 * (1 << 30)
+
+        newPos = successorGameState.getPacmanPosition()
+        currentPos = currentGameState.getPacmanPosition()
+
+        newFood = successorGameState.getFood()
+        currentFood = currentGameState.getFood()
+
+        newGhostStates = successorGameState.getGhostStates()
+        currentGhostStates = currentGameState.getGhostStates()
+
+        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        currentScaredTimes = currentGameState.getGhostStates()
+
+        # Weights
+        ghostDistance_weight = 500
+        eatDot_weight = 100
+        northEastPrefference_weight = 10
+
+        score = 0
+
+        # Eat Food
+        distToClosestFood = 1 << 30
+        foodEastOfPacman = 0
+        for foodPellet in currentFood.asList():
+            if foodPellet[0] > currentPos[0]: # food is farther east
+                foodEastOfPacman +=1
+            distToFood = manhattanDistance(newPos, foodPellet)
+            distToClosestFood = min(distToClosestFood, distToFood)
+            if distToFood == 0: # move eats food
+                score += eatDot_weight
+        score -= distToClosestFood # move pacman closer to closest food
+
+        # Go EAST First to prevent pacman going back and forth 
+        if foodEastOfPacman and action == Directions.EAST:
+            score += northEastPrefference_weight
+        return score
 
 def scoreEvaluationFunction(currentGameState):
     """
