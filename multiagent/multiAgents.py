@@ -90,7 +90,8 @@ class ReflexAgent(Agent):
         # Weights
         ghostDistance_weight = 500
         eatDot_weight = 100
-        northEastPrefference_weight = 10
+        eastPrefference_weight = 1
+        dontStop_weight = 10
 
         score = 0
 
@@ -108,7 +109,10 @@ class ReflexAgent(Agent):
 
         # Go EAST First to prevent pacman going back and forth 
         if foodEastOfPacman and action == Directions.EAST:
-            score += northEastPrefference_weight
+            score += eastPrefference_weight
+
+        if action == Directions.STOP:
+            score -= dontStop_weight
         return score
 
 def scoreEvaluationFunction(currentGameState):
