@@ -89,19 +89,28 @@ class ReflexAgent(Agent):
 
         # Weights
         ghostDistance_weight = 500
-        eatDot_weight = 100
-        eastPrefference_weight = 1
-        dontStop_weight = 10
+        eatDot_weight = 100         # Weight added when dot can be eaten
+        eastPrefference_weight = 1  # Weight added when going east and food is east
+        dontStop_weight = 10        # Weight subtracted when stop action is taken
 
-        score = 0
+        score = 0                   # Base score that is updated with weights
+        # Avoid Death
+        for ghost in currentGhostStates:
+            distToPacman = manhattanDistance(ghost.getPosition(), newPos)
+            if distToPacman <= 1: # ghost on pacman
+                score -= ghostDistance_weight # do not pick this 
+            if distToPacman < 4: # avoid tiles near ghost
+                score -= distToPacman
 
         # Eat Food
-        distToClosestFood = 1 << 30
-        foodEastOfPacman = 0
+        distToClosestFood = 1 << 30 # Used to bring packman towards food
+        foodEastOfPacman = 0 # Used to keep trak of food to the east of packman
         for foodPellet in currentFood.asList():
             if foodPellet[0] > currentPos[0]: # food is farther east
                 foodEastOfPacman +=1
+            # find distance to food pellet
             distToFood = manhattanDistance(newPos, foodPellet)
+            # update min distance if neccessary
             distToClosestFood = min(distToClosestFood, distToFood)
             if distToFood == 0: # move eats food
                 score += eatDot_weight
@@ -111,6 +120,7 @@ class ReflexAgent(Agent):
         if foodEastOfPacman and action == Directions.EAST:
             score += eastPrefference_weight
 
+        # Avoid stopping
         if action == Directions.STOP:
             score -= dontStop_weight
         return score
