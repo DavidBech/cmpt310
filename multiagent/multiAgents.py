@@ -186,35 +186,39 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         PACMAN = 0
         def minmax(state, depth, currentAgent) -> int:
+            # if leaf/end of search return the evaluation of the state
             if state.isWin() or state.isLose() or depth == 0:
                 return self.evaluationFunction(state)
             
+            # set up values based on current agent 
             if currentAgent == PACMAN:
-                minmaxValue = -1* (1 << 30)
-                minmaxFunction = max
+                curValue = float("-inf")
                 newDepth = depth
             else:
-                minmaxValue = 1 << 30
-                minmaxFunction = min
-                if currentAgent + 1 % state.getNumAgents() == PACMAN:
+                curValue = float("inf")
+                if (currentAgent + 1) % state.getNumAgents() == PACMAN: # check if this is last min agent
                     newDepth = depth -1 # decrease depth if new agent is pacman
                 else:
                     newDepth = depth
 
-            minmaxAction = None
+            pacmanAction = None
+            # loop over actions on current state
             for action in state.getLegalActions(currentAgent):
-                oldScore = minmaxValue
-                minmaxValue = minmaxFunction(minmaxValue, # old value
-                                                minmax(state.generateSuccessor(currentAgent, action), # new state
+                # get the new value
+                actionValue = minmax(state.generateSuccessor(currentAgent, action), # new state
                                                     newDepth, # new depth add one if it is pacmans turn again
-                                                    currentAgent + 1 % state.getNumAgents()))
-                if oldScore != minmaxValue and currentAgent == PACMAN:
-                    minmaxAction = action
-            if depth == self.depth and currentAgent == PACMAN:
-                return minmaxAction
-            else:
-                return minmaxValue
+                                                    (currentAgent + 1) % state.getNumAgents()
+                                    )
+                if currentAgent == PACMAN and actionValue > curValue: # max agent
+                    curValue = actionValue
+                    pacmanAction = action
+                elif currentAgent != PACMAN and actionValue < curValue: # min agent
+                    curValue = actionValue
 
+            if depth == self.depth and currentAgent == PACMAN: # first call finished
+                return pacmanAction
+            else: # return value calculated
+                return curValue
         return minmax(gameState, self.depth, PACMAN)
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
