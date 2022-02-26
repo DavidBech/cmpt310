@@ -231,7 +231,58 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        PACMAN=0
+        def alphaBetaPrune(state, alpha, beta, depth, currentAgent):
+            # if leaf/end of search return the evaluation of the state
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            
+            # set up values based on current agent 
+            if currentAgent == PACMAN:
+                curValue = float("-inf")
+                newDepth = depth
+            else:
+                curValue = float("inf")
+                if (currentAgent + 1) % state.getNumAgents() == PACMAN: # check if this is last min agent
+                    newDepth = depth -1 # decrease depth if new agent is pacman
+                else:
+                    newDepth = depth
+
+            pacmanAction = None
+            # loop over actions on current state
+            for action in state.getLegalActions(currentAgent):
+                # get the new value
+                actionValue = alphaBetaPrune(state.generateSuccessor(currentAgent, action), # new state
+                                                    alpha,
+                                                    beta,
+                                                    newDepth, # new depth add one if it is pacmans turn again
+                                                    (currentAgent + 1) % state.getNumAgents()
+                                    )
+                if currentAgent == PACMAN: # max agent
+                    if actionValue > beta:
+                        curValue = actionValue
+                        break
+                    else:
+                        alpha = max(alpha, actionValue)
+                    if actionValue > curValue: 
+                        curValue = actionValue
+                        pacmanAction = action
+                else:
+                    if actionValue < alpha:
+                        curValue = actionValue
+                        break
+                    else:
+                        beta = min(beta, actionValue)
+                    if actionValue < curValue: # min agent
+                        curValue = actionValue
+
+            if depth == self.depth and currentAgent == PACMAN: # first call finished
+                #print(f"depth{depth} agent{currentAgent} value{curValue} action{pacmanAction}")
+                return pacmanAction
+            else: # return value calculated
+                #print(f"depth{depth} agent{currentAgent} value{curValue}")
+                return curValue
+        return alphaBetaPrune(gameState, float("-inf"), float("inf"), self.depth, PACMAN)
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
