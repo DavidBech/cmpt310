@@ -352,38 +352,64 @@ def betterEvaluationFunction(currentGameState):
     foodPos = currentGameState.getFood()
     pacmanPos = currentGameState.getPacmanPosition()
     ghostStates = currentGameState.getGhostStates()
-    scaredTimers = [ghostState.scaredTimer for ghostState in ghostStates]
+    capsulList = currentGameState.getCapsules()
 
     # Weights
-    ghostDistance_weight = 10000
-    closestFood_weight = 1
-    foodQuantity_weight = 100
+    ghostDistance_weight = 131071 # weight to be subtracted if move would kill pacman
+    closestFood_weight = 2 # distance to closest food multiplier
+    foodQuantity_weight = 101 # score penalty per remaining food
+    closestCapsul_weight = 11 # distance to closest food multiplier
+    capsulQuantity_weight = 503 # score penatly per remaining capsul
 
-    score = 0                   # Base score that is updated with weights
-    # Avoid Death
-    for ghost in ghostStates:
-        distToPacman = manhattanDistance(ghost.getPosition(), pacmanPos)
-        if distToPacman <= 1: # ghost on pacman
-            score -= ghostDistance_weight # do not pick this 
-        if distToPacman < 4: # avoid tiles near ghost
-            score -= (5-distToPacman)
+    score = 0 # Base score that is updated with weights
+
+    # Eat Capsul
+    if len(capsulList):
+        distanceToClosestCapsul = float("inf")
+        for capsul in capsulList:
+            # find distance to capsul
+            distanceToClosestCapsul = min(distanceToClosestCapsul, manhattanDistance(pacmanPos, capsul))
+        score -= distanceToClosestCapsul * closestCapsul_weight # move pacman closer to capsul
+
+        # Clear Capsul
+        score -= capsulQuantity_weight*len(capsulList)
+    else:
+        score += 100
 
     # Eat Food
     foodList = foodPos.asList()
-    distToClosestFood = float("inf") # Used to bring packman towards food
-    for foodPellet in foodList:
-        # find distance to food pellet
-        distToClosestFood = min(distToClosestFood, manhattanDistance(pacmanPos, foodPellet))
-    score -= distToClosestFood * closestFood_weight # move pacman closer to closest food
+    if len(foodList):
+        distToClosestFood = float("inf") # Used to bring packman towards food
+        for foodPellet in foodList:
+            # find distance to food pellet
+            distToClosestFood = min(distToClosestFood, manhattanDistance(pacmanPos, foodPellet))
+        score -= distToClosestFood * closestFood_weight # move pacman closer to closest food
+        # Clear Food
+        score -= foodQuantity_weight*len(foodList)
+    else:
+        score += 100
 
-    # Clear Food
-    score -= foodQuantity_weight*len(foodList)
-
-    score += random.normalvariate(0, 1)
+    if len(foodList) > 2:
+        # Avoid Death
+        for ghost in ghostStates:
+            distToPacman = manhattanDistance(ghost.getPosition(), pacmanPos)
+            if ghost.scaredTimer: # if ghost is scared pacman should eat ghost for more points
+                pass #TODO
+            if distToPacman <= 1: # ghost on pacman
+                score -= ghostDistance_weight # do not pick this 
+            if distToPacman < 4: # avoid tiles near ghost
+                score -= (5-distToPacman)
+    
+    # Add random chance
+    #score += random.normalvariate(0, 1)
 
     # force game to end
-    if len(foodList) == 0:
-        score = 100000
+    #if len(foodList) == 0 and len(capsulList) == 0:
+    #    score = 1000000
+    #    util.pause()
+
+    # addition the game score means the game will try to end fast
+    score += currentGameState.getScore()
     return score
 
 # Abbreviation
