@@ -297,7 +297,49 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        PACMAN=0
+        def expectimax(state, depth, currentAgent):
+            # if leaf/end of search return the evaluation of the state
+            if state.isWin() or state.isLose() or depth == 0:
+                return self.evaluationFunction(state)
+            
+            # set up values based on current agent 
+            if currentAgent == PACMAN:
+                curValue = float("-inf")
+                newDepth = depth
+            else:
+                curValue = 0
+                if (currentAgent + 1) % state.getNumAgents() == PACMAN: # check if this is last min agent
+                    newDepth = depth -1 # decrease depth if new agent is pacman
+                else:
+                    newDepth = depth
+
+            pacmanAction = None
+            # loop over actions on current state
+            numberOfActions = len(state.getLegalActions(currentAgent))
+            for action in state.getLegalActions(currentAgent):
+                # get the new value
+                actionValue = expectimax(state.generateSuccessor(currentAgent, action), # new state
+                                                    newDepth, # new depth add one if it is pacmans turn again
+                                                    (currentAgent + 1) % state.getNumAgents()
+                                    )
+                if currentAgent == PACMAN: # max agent
+                    if actionValue > curValue: 
+                        curValue = actionValue
+                        pacmanAction = action
+                else: # min agent
+                    curValue += actionValue
+            if depth == self.depth and currentAgent == PACMAN: # first call finished
+                #print(f"depth{depth} agent{currentAgent} value{curValue} action{pacmanAction}")
+                return pacmanAction
+            else: # return value calculated
+                #print(f"depth{depth} agent{currentAgent} value{curValue}")
+                if currentAgent == PACMAN:
+                    return curValue
+                else:
+                    return curValue/numberOfActions
+
+        return expectimax(gameState, self.depth, PACMAN)
 
 def betterEvaluationFunction(currentGameState):
     """
