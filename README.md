@@ -1,4 +1,4 @@
-Assignment2 branch for cmpt310 course
+Assignment3 branch for cmpt310 course
 
 David Bechert
 
