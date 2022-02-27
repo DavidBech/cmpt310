@@ -346,7 +346,15 @@ def betterEvaluationFunction(currentGameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: 
+        States are evaluated using the following measures
+        - Eat Capsuls
+        - Eat food
+        - Don't die
+        - Don't go near ghosts
+        - Get the highest score
+
+        The scores are calculated then their respective weight is multiplied
     """
     "*** YOUR CODE HERE ***"
     foodPos = currentGameState.getFood()
@@ -393,21 +401,11 @@ def betterEvaluationFunction(currentGameState):
         # Avoid Death
         for ghost in ghostStates:
             distToPacman = manhattanDistance(ghost.getPosition(), pacmanPos)
-            if ghost.scaredTimer: # if ghost is scared pacman should eat ghost for more points
-                pass #TODO
             if distToPacman <= 1: # ghost on pacman
                 score -= ghostDistance_weight # do not pick this 
             if distToPacman < 4: # avoid tiles near ghost
                 score -= (5-distToPacman)
     
-    # Add random chance
-    #score += random.normalvariate(0, 1)
-
-    # force game to end
-    #if len(foodList) == 0 and len(capsulList) == 0:
-    #    score = 1000000
-    #    util.pause()
-
     # addition the game score means the game will try to end fast
     score += currentGameState.getScore()
     return score
