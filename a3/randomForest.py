@@ -16,8 +16,10 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, random_sta
 
 rfc = RandomForestClassifier()
 rfc.fit(X_train, y_train)
-print(rfc.feature_importances_)
 plt.bar([0,1,2,3,4,5,6,7,8,9,10,11], rfc.feature_importances_)
+plt.xlabel("Feature Index")
+plt.ylabel("Weight")
+plt.title("Feature Importance Weights")
 plt.show()
-print(rfc.score(X_test, y_test))
+print(f"Score {rfc.score(X_test, y_test)}")
 
