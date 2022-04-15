@@ -30,6 +30,7 @@ import mdp, util
 
 from learningAgents import ValueEstimationAgent
 import collections
+import random 
 
 class ValueIterationAgent(ValueEstimationAgent):
     """
@@ -61,8 +62,16 @@ class ValueIterationAgent(ValueEstimationAgent):
 
     def runValueIteration(self):
         # Write value iteration code here
-        "*** YOUR CODE HERE ***"
-
+        states = self.mdp.getStates()
+        
+        for iter in range(self.iterations):
+            for state in states:
+                actions = self.mdp.getPossibleActions(state)
+                maxVal = float("-inf")
+                for action in actions:
+                    maxVal = max(maxVal, self.computeQValueFromValues(state, action))
+                self.values[state] = maxVal
+                
 
     def getValue(self, state):
         """
@@ -76,8 +85,14 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        stateProbList = self.mdp.getTransitionStatesAndProbs(state, action)
+        total = 0
+        for stateProb in stateProbList:
+            nextState = stateProb[0]
+            prob = stateProb[1]
+            total += prob * (self.mdp.getReward(state, action, nextState) + (self.discount * self.getValue(nextState)))
+        return total
+
 
     def computeActionFromValues(self, state):
         """
@@ -88,8 +103,21 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = self.mdp.getPossibleActions(state)
+
+        if len(actions) == 0:
+            return None
+        
+        bestActions = []
+        bestScore = float("-inf")
+        for action in actions:
+            score = self.computeQValueFromValues(state, action)
+            if score > bestScore:
+                bestScore = score
+                bestActions = [action]
+            elif score == bestScore:
+                bestActions.append(action)
+        return random.choice(bestActions)
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
