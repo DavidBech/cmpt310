@@ -67,7 +67,7 @@ class QLearningAgent(ReinforcementAgent):
         if len(legalActions) == 0:
             return 0
 
-        currentMax = -1
+        currentMax = float("-inf")
         for action in legalActions:
             actionQVal = self.getQValue(state, action)
             if actionQVal > currentMax:
@@ -128,7 +128,7 @@ class QLearningAgent(ReinforcementAgent):
         "*** YOUR CODE HERE ***"
         # Value = (1-a)Q(s,a) + (a)[sample]
         self.qValues[(state, action)] = ((1 - self.alpha) * self.getQValue(state,action) 
-                                        + (self.alpha) * (reward + (self.discount*self.getValue(nextState))))
+                                        + self.alpha * (reward + (self.discount*self.getValue(nextState))))
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
